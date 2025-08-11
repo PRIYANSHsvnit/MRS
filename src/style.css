@@ -1,0 +1,69 @@
+/* style.css */
+/* Font and heading colors */
+.stTitle h1 {
+    font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+    color: #6a11cb;
+}
+
+.stMarkdown h3 {
+    font-family: 'Verdana', sans-serif;
+    color: #2575fc;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+/* Movie separator */
+.stContainer {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stContainer:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+/* Link styling */
+.movie-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 8px;
+    color: #6a11cb;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.movie-link:hover {
+    color: #2575fc;
+}
+
+.movie-link-icon {
+    margin-left: 5px;
+    font-size: 0.9em;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .stTitle h1 {
+    color: #8a2be2;
+}
+
+[data-theme="dark"] .stMarkdown h3 {
+    color: #4b6cb7;
+    border-bottom-color: #333;
+}
+
+[data-theme="dark"] .stContainer {
+    border-bottom-color: #333333;
+}
+
+[data-theme="dark"] .movie-link {
+    color: #8a2be2;
+}
+
+[data-theme="dark"] .movie-link:hover {
+    color: #4b6cb7;
+}
