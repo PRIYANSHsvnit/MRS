@@ -1,16 +1,29 @@
 # app.py
 import json
+import os
 import streamlit as st
 from recommend import df, recommend_movies
 from omdb_utils import get_movie_details
+import subprocess
+
+# Check and generate data files if missing
+if not os.path.exists('df_cleaned.pkl') or not os.path.exists('cosine_sim.pkl'):
+    with st.spinner("⚙️ First-time setup: Preparing data (this may take a few minutes)..."):
+        try:
+            subprocess.run(["python", "preprocess.py"], check=True)
+            st.experimental_rerun()
+        except Exception as e:
+            st.error(f"Setup failed: {str(e)}")
+            st.stop()
+
+# Load CSS
 st.markdown('<style>' + open('style.css').read() + '</style>', unsafe_allow_html=True)
 
-
+# Load config
 config = json.load(open("config.json"))
-
-# OMDB api key
 OMDB_API_KEY = config["OMDB_API_KEY"]
 
+# App UI
 st.set_page_config(
     page_title="Movie Recommendation App",
     page_icon="🎬",
@@ -19,7 +32,7 @@ st.set_page_config(
 
 st.title("🎬 Movie Recommendation App")
 
-# Using 'title'
+# Movie selection
 movie_list = sorted(df['title'].dropna().unique())
 selected_movie = st.selectbox("🎬 Select a movie:", movie_list)
 

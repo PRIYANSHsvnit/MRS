@@ -4,11 +4,11 @@ import re
 import nltk
 import joblib
 import logging
+import os
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
 
 # Setup logging
 logging.basicConfig(
@@ -20,60 +20,52 @@ logging.basicConfig(
     ]
 )
 
-logging.info("🚀 Starting preprocessing...")
+def should_preprocess():
+    """Check if preprocessing is needed"""
+    return not os.path.exists('df_cleaned.pkl') or not os.path.exists('cosine_sim.pkl')
 
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
+def main():
+    if not should_preprocess():
+        logging.info("✅ Data files already exist")
+        return
 
-# Text cleaning
-stop_words = set(stopwords.words('english'))
+    logging.info("🚀 Starting preprocessing...")
+    nltk.download('punkt')
+    nltk.download('stopwords')
 
-# Load and sample dataset
-try:
-    df = pd.read_csv("movies.csv")
-    logging.info("✅ Dataset loaded successfully. Total rows: %d", len(df))
-except Exception as e:
-    logging.error("❌ Failed to load dataset: %s", str(e))
-    raise e
+    # Load and clean data
+    try:
+        df = pd.read_csv("movies.csv")
+        logging.info("✅ Dataset loaded successfully. Rows: %d", len(df))
+    except Exception as e:
+        logging.error("❌ Failed to load dataset: %s", str(e))
+        raise
 
-def preprocess_text(text):
-    text = re.sub(r"[^a-zA-Z\s]", "", str(text))
-    text = text.lower()
-    tokens = word_tokenize(text)
-    tokens = [word for word in tokens if word not in stop_words]
-    return " ".join(tokens)
+    stop_words = set(stopwords.words('english'))
 
+    def preprocess_text(text):
+        text = re.sub(r"[^a-zA-Z\s]", "", str(text))
+        text = text.lower()
+        tokens = word_tokenize(text)
+        tokens = [word for word in tokens if word not in stop_words]
+        return " ".join(tokens)
 
-# filter the required columns for recommendation
-required_columns = ["genres", "keywords", "overview", "title"]
+    required_columns = ["genres", "keywords", "overview", "title"]
+    df = df[required_columns].dropna().reset_index(drop=True)
+    df['combined'] = df['genres'] + ' ' + df['keywords'] + ' ' + df['overview']
+    df['cleaned_text'] = df['combined'].apply(preprocess_text)
 
-df = df[required_columns]
+    # Vectorization
+    tfidf = TfidfVectorizer(max_features=5000)
+    tfidf_matrix = tfidf.fit_transform(df['cleaned_text'])
 
-df = df.dropna().reset_index(drop=True)
+    # Calculate similarity
+    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
-df['combined'] = df['genres'] + ' ' + df['keywords'] + ' ' + df['overview']
+    # Save files
+    joblib.dump(df, 'df_cleaned.pkl')
+    joblib.dump(cosine_sim, 'cosine_sim.pkl')
+    logging.info("💾 Data saved to disk")
 
-logging.info("🧹 Cleaning text...")
-df['cleaned_text'] = df['combined'].apply(preprocess_text)
-logging.info("✅ Text cleaned.")
-
-
-# Vectorization
-logging.info("🔠 Vectorizing using TF-IDF...")
-tfidf = TfidfVectorizer(max_features=5000)
-tfidf_matrix = tfidf.fit_transform(df['cleaned_text'])
-logging.info("✅ TF-IDF matrix shape: %s", tfidf_matrix.shape)
-
-# Cosine similarity
-logging.info("📐 Calculating cosine similarity...")
-cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
-logging.info("✅ Cosine similarity matrix generated.")
-
-# Save everything
-joblib.dump(df, 'df_cleaned.pkl')
-joblib.dump(tfidf_matrix, 'tfidf_matrix.pkl')
-joblib.dump(cosine_sim, 'cosine_sim.pkl')
-logging.info("💾 Data saved to disk.")
-
-logging.info("✅ Preprocessing complete.")
+if __name__ == "__main__":
+    main()

@@ -1,8 +1,6 @@
 # Byte-compiled / optimized / DLL files
 config.json
-cosine_sim.pkl
-df_cleaned.pkl
-tfidf_matrix.pkl
+*.pkl
 __pycache__/
 *.py[cod]
 *$py.class
