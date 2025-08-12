@@ -1,3 +1,4 @@
+# recommend.py
 import joblib
 import logging
 
@@ -37,4 +38,4 @@ def recommend_movies(movie_name, top_n=5):
     result_df.index = result_df.index + 1  # Start from 1 instead of 0
     result_df.index.name = "S.No."
 
-    return result_df , # omdb_utils.py
+    return result_df
