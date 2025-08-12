@@ -1,6 +1,7 @@
-# recommend.py
+import os
 import joblib
 import logging
+import subprocess
 
 # Setup logging
 logging.basicConfig(
@@ -12,7 +13,26 @@ logging.basicConfig(
     ]
 )
 
-logging.info("🔁 Loading data...")
+logging.info("🔁 Checking for preprocessed files...")
+
+# Files we need
+required_files = ['df_cleaned.pkl', 'cosine_sim.pkl']
+
+# If missing, run preprocessing
+missing_files = [f for f in required_files if not os.path.exists(f)]
+if missing_files:
+    logging.warning("⚠️ Missing files: %s", ", ".join(missing_files))
+    logging.info("🏗 Running preprocessing script...")
+    try:
+        subprocess.run(['python', 'preprocess.py'], check=True)
+        logging.info("✅ Preprocessing complete.")
+    except subprocess.CalledProcessError as e:
+        logging.error("❌ Failed to run preprocessing: %s", str(e))
+        raise e
+else:
+    logging.info("✅ All required files found.")
+
+# Load data
 try:
     df = joblib.load('df_cleaned.pkl')
     cosine_sim = joblib.load('cosine_sim.pkl')
