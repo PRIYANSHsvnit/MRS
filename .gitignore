@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 config.json
-*.pkl
 __pycache__/
 *.py[cod]
 *$py.class
