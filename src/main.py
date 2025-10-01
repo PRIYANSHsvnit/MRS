@@ -3,7 +3,7 @@ import json
 import streamlit as st
 from recommend import df, recommend_movies
 from omdb_utils import get_movie_details
-st.markdown('<style>' + open('src/style.css').read() + '</style>', unsafe_allow_html=True)
+st.markdown('<style>' + open('style.css').read() + '</style>', unsafe_allow_html=True)
 
 
 config = json.load(open("config.json"))
